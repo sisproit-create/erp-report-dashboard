@@ -3,3 +3,69 @@
 @media(max-width:1100px){.health-grid,.metrics-grid.five{grid-template-columns:repeat(3,1fr)}.report-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:800px){.app-shell{display:block}.sidebar{transform:translateX(-100%);transition:.25s}.sidebar.open{transform:translateX(0)}main{grid-column:auto}.mobile-menu{display:block}.topbar{padding:20px;align-items:center}.topbar h1{font-size:29px}.topbar p,.period{display:none}.content{padding:0 16px 30px}.health-grid,.metrics-grid.five,.metrics-grid.four{grid-template-columns:repeat(2,1fr)}.dashboard-grid.two-one,.dashboard-grid.equal,.chart-grid.four{grid-template-columns:1fr}.report-grid{grid-template-columns:1fr}.report-tools{flex-direction:column}.report-tools select{flex:auto;width:100%}}
 @media(max-width:520px){.health-grid,.metrics-grid.five,.metrics-grid.four{grid-template-columns:1fr}.top-actions button{padding:11px}.topbar{gap:10px}.metric{min-height:120px}}
+
+/* V5 · Visual vitality and diagnostics */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 78% 8%, rgba(24,185,242,.10), transparent 26%),
+    radial-gradient(circle at 22% 76%, rgba(45,212,191,.07), transparent 28%);
+  z-index: 0;
+}
+main, .sidebar { position: relative; z-index: 1; }
+.metric {
+  position: relative;
+  overflow: hidden;
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+.metric::after {
+  content: "";
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  right: -60px;
+  top: -70px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(24,185,242,.16), transparent 66%);
+}
+.metric:hover { transform: translateY(-3px); border-color: rgba(24,185,242,.42); box-shadow: 0 18px 42px rgba(0,0,0,.22); }
+.panel { transition: border-color .22s ease, box-shadow .22s ease; }
+.panel:hover { border-color: rgba(24,185,242,.25); box-shadow: 0 18px 50px rgba(0,0,0,.16); }
+.diagnostic-banner {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+  padding: 15px 17px;
+  border: 1px solid rgba(248,113,113,.35);
+  border-radius: 16px;
+  background: linear-gradient(90deg, rgba(127,29,29,.36), rgba(127,29,29,.10));
+  color: #fecaca;
+}
+.diagnostic-banner.warn {
+  border-color: rgba(251,191,36,.35);
+  background: linear-gradient(90deg, rgba(120,53,15,.34), rgba(120,53,15,.08));
+  color: #fde68a;
+}
+.diagnostic-banner div { display:flex; flex-direction:column; gap:4px; }
+.diagnostic-banner span { font-size: .83rem; opacity:.88; }
+.chart-empty {
+  min-height: 230px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:9px;
+  color:#7890a5;
+  border:1px dashed rgba(120,144,165,.25);
+  border-radius:16px;
+  background:linear-gradient(135deg, rgba(24,185,242,.04), rgba(45,212,191,.02));
+}
+.chart-empty svg { color:#18b9f2; }
+.chart-empty strong { color:#d9e8f5; }
+.recent-reports a { transition: transform .18s ease, background .18s ease, border-color .18s ease; }
+.recent-reports a:hover { transform: translateX(4px); background:rgba(24,185,242,.07); border-color:rgba(24,185,242,.28); }
+.sidebar nav button.active { box-shadow: inset 3px 0 0 #18b9f2, 0 8px 26px rgba(24,185,242,.12); }

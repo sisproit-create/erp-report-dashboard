@@ -11,7 +11,7 @@ import {
 import { supabase } from './lib/supabase';
 
 type ViewKey = 'resumen' | 'produccion' | 'combustible' | 'ac30' | 'equipos' | 'costos' | 'reportes' | 'alertas';
-type Report = { id:string; titulo:string; descripcion:string|null; categoria:string; periodo:string|null; formato:string; archivo_nombre:string; archivo_url:string; archivo_size:number; fecha_publicacion:string };
+type Report = { id:string; titulo:string; descripcion:string|null; categoria:string; periodo:string|null; formato:string; archivo_nombre:string; archivo_url:string; archivo_size:number; fecha_publicacion:string; destacado?:boolean; orden_destacado?:number|null };
 type Indicator = { codigo:string; nombre:string; valor:number; unidad:string; categoria:string; fecha_actualizacion:string };
 type Summary = {
   periodo:string; salud:string; puntaje:number; resumen:string; costo_total_ton:number; margen_pct:number;
@@ -44,6 +44,7 @@ const NAV: {key:ViewKey; label:string; icon:any}[] = [
 ];
 
 function safe<T>(result: {data:T|null; error:any}): T | null { return result.error ? null : result.data; }
+function issue(label:string,result:{error:any}){ return result.error ? `${label}: ${result.error.message || 'Error de consulta'}` : null; }
 function healthTone(value:string) { const v=(value||'').toUpperCase(); return v.includes('SALUD')||v.includes('VERDE') ? 'ok' : v.includes('AMAR')||v.includes('OBS') ? 'warn' : 'danger'; }
 function severityTone(value:string) { return value==='critica' ? 'danger' : value==='advertencia' ? 'warn' : 'info'; }
 
@@ -60,6 +61,7 @@ function App() {
   const [alerts,setAlerts]=useState<AlertRow[]>([]);
   const [query,setQuery]=useState('');
   const [category,setCategory]=useState('Todas');
+  const [loadIssues,setLoadIssues]=useState<string[]>([]);
 
   async function load() {
     setLoading(true);
@@ -72,6 +74,8 @@ function App() {
       supabase.from('erp_dashboard_rankings').select('*').order('posicion',{ascending:true}),
       supabase.from('erp_alertas').select('*').order('fecha_actualizacion',{ascending:false}),
     ]);
+    const issues=[issue('Reportes',r),issue('Indicadores',i),issue('Resumen',s),issue('Tendencias',ser),issue('Equipos',eq),issue('Rankings',rank),issue('Alertas',al)].filter(Boolean) as string[];
+    setLoadIssues(issues);
     const validReports=(safe<Report[]>(r) ?? []).filter(x=>!INVALID_REPORT.test(`${x.titulo} ${x.archivo_nombre}`));
     const summaryRows=safe<Summary[]>(s) ?? [];
     const active=summaryRows[0] ?? null;
@@ -103,7 +107,7 @@ function App() {
       <header className="topbar"><button className="mobile-menu" onClick={()=>setMobileOpen(!mobileOpen)}>{mobileOpen?<X/>:<Menu/>}</button><div><span className="eyebrow">SAS SMARTPLANT · EXECUTIVE PORTAL</span><h1>{NAV.find(n=>n.key===view)?.label}</h1><p>{view==='resumen'?'Control consolidado de producción, costos, consumos, laboratorio y reportes del ERP.':'Información operativa publicada directamente desde el ERP.'}</p></div><div className="top-actions"><div className="period"><small>Periodo de referencia</small><strong>{summary?.periodo ?? 'Sin datos'}</strong></div><button onClick={load}><RefreshCw size={18}/>Actualizar</button></div></header>
       <div className="content">
         {loading?<div className="loading">Sincronizando información del ERP…</div>:
-          view==='resumen'?<Executive summary={summary} series={series} equipment={equipment} rankings={rankings} alerts={alerts} reports={reports}/>:
+          view==='resumen'?<Executive summary={summary} series={series} equipment={equipment} rankings={rankings} alerts={alerts} reports={reports} loadIssues={loadIssues}/>:
           view==='produccion'?<Production summary={summary} series={series}/>:
           view==='combustible'?<FuelPage summary={summary} series={series} equipment={equipment}/>:
           view==='ac30'?<AC30Page summary={summary} series={series}/>:
@@ -123,10 +127,14 @@ function Metric({label,value,sub,icon:Icon,tone='neutral'}:{label:string;value:s
 function Panel({title,kicker,children,className=''}:{title:string;kicker?:string;children:any;className?:string}) { return <section className={`panel ${className}`}><div className="panel-head">{kicker&&<span>{kicker}</span>}<h2>{title}</h2></div>{children}</section>; }
 function ChartTooltip({active,payload,label}:any){if(!active||!payload?.length)return null;return <div className="chart-tooltip"><strong>{label}</strong>{payload.map((p:any)=><span key={p.dataKey}>{p.name}: {fmt.format(p.value)}</span>)}</div>}
 
-function Executive({summary:s,series,equipment,rankings,alerts,reports}:{summary:Summary|null;series:SeriesRow[];equipment:EquipmentRow[];rankings:RankingRow[];alerts:AlertRow[];reports:Report[]}) {
+function Executive({summary:s,series,equipment,rankings,alerts,reports,loadIssues}:{summary:Summary|null;series:SeriesRow[];equipment:EquipmentRow[];rankings:RankingRow[];alerts:AlertRow[];reports:Report[];loadIssues:string[]}) {
   if(!s) return <EmptySetup/>;
-  const reportFive=reports.slice(0,5);
+  const featured=reports.filter(r=>r.destacado).sort((a,b)=>(a.orden_destacado??99)-(b.orden_destacado??99));
+  const periodReports=reports.filter(r=>r.periodo===s.periodo && r.formato==='PDF');
+  const reportFive=(featured.length?featured:periodReports.length?periodReports:reports).slice(0,5);
   return <>
+    {loadIssues.length>0&&<div className="diagnostic-banner"><AlertTriangle/><div><strong>Sincronización incompleta</strong><span>{loadIssues.join(' · ')}</span></div></div>}
+    {series.length===0&&<div className="diagnostic-banner warn"><Activity/><div><strong>Tendencias pendientes</strong><span>El resumen ejecutivo está disponible, pero no hay filas para el periodo {s.periodo}. Vuelve a publicar desde el ERP actualizado.</span></div></div>}
     <div className="health-grid">
       <Metric label="Salud del negocio" value={`${s.salud} · ${fmt.format(s.puntaje)}/100`} icon={ShieldCheck} tone={healthTone(s.salud)}/>
       <Metric label="Costo/T gerencial" value={`${money.format(s.costo_total_ton)}/T`} icon={CircleDollarSign}/>
@@ -171,8 +179,8 @@ function Executive({summary:s,series,equipment,rankings,alerts,reports}:{summary
   </>;
 }
 
-function MiniLine({title,data,keyName,unit}:{title:string;data:SeriesRow[];keyName:keyof SeriesRow;unit:string}) { return <div className="mini-chart"><h3>{title}</h3><ResponsiveContainer width="100%" height={230}><LineChart data={data}><CartesianGrid stroke="#1e3345" vertical={false}/><XAxis dataKey="fecha" tickFormatter={v=>shortDate.format(new Date(`${v}T00:00:00`))} tick={{fill:'#7890a5',fontSize:10}} axisLine={false}/><YAxis tick={{fill:'#7890a5',fontSize:10}} axisLine={false}/><Tooltip content={<ChartTooltip/>}/><Line type="monotone" dataKey={keyName as string} name={`${title} ${unit}`} stroke="#18b9f2" strokeWidth={2.5} dot={false}/></LineChart></ResponsiveContainer></div> }
-function EquipmentChart({data}:{data:EquipmentRow[]}) { return <ResponsiveContainer width="100%" height={330}><BarChart data={data.slice(0,10)} margin={{bottom:65}}><CartesianGrid stroke="#1e3345" vertical={false}/><XAxis dataKey="equipo" angle={-45} textAnchor="end" tick={{fill:'#7890a5',fontSize:10}} interval={0}/><YAxis tick={{fill:'#7890a5',fontSize:10}}/><Tooltip content={<ChartTooltip/>}/><Bar dataKey="galones_consumo" name="Galones" fill="#147dc2" radius={[5,5,0,0]}/></BarChart></ResponsiveContainer> }
+function MiniLine({title,data,keyName,unit}:{title:string;data:SeriesRow[];keyName:keyof SeriesRow;unit:string}) { if(!data.length)return <div className="chart-empty"><Activity/><strong>Sin datos publicados</strong><span>Actualiza el portal desde el ERP.</span></div>; return <div className="mini-chart"><h3>{title}</h3><ResponsiveContainer width="100%" height={230}><LineChart data={data}><defs><linearGradient id={`line-${String(keyName)}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#18b9f2"/><stop offset="1" stopColor="#2dd4bf"/></linearGradient></defs><CartesianGrid stroke="#1e3345" vertical={false}/><XAxis dataKey="fecha" tickFormatter={v=>shortDate.format(new Date(`${v}T00:00:00`))} tick={{fill:'#7890a5',fontSize:10}} axisLine={false}/><YAxis tick={{fill:'#7890a5',fontSize:10}} axisLine={false}/><Tooltip content={<ChartTooltip/>}/><Line type="monotone" dataKey={keyName as string} name={`${title} ${unit}`} stroke={`url(#line-${String(keyName)})`} strokeWidth={3} dot={{r:3,fill:'#18b9f2',strokeWidth:0}} activeDot={{r:6}}/></LineChart></ResponsiveContainer></div> }
+function EquipmentChart({data}:{data:EquipmentRow[]}) { if(!data.length)return <div className="chart-empty"><Truck/><strong>Sin consumo por equipo</strong><span>Publica nuevamente desde el ERP.</span></div>; return <ResponsiveContainer width="100%" height={330}><BarChart data={data.slice(0,10)} margin={{bottom:65}}><CartesianGrid stroke="#1e3345" vertical={false}/><XAxis dataKey="equipo" angle={-45} textAnchor="end" tick={{fill:'#7890a5',fontSize:10}} interval={0}/><YAxis tick={{fill:'#7890a5',fontSize:10}}/><Tooltip content={<ChartTooltip/>}/><Bar dataKey="galones_consumo" name="Galones" fill="#147dc2" radius={[5,5,0,0]}/></BarChart></ResponsiveContainer> }
 function AlertList({alerts}:{alerts:AlertRow[]}) { return <div className="alert-list">{alerts.length?alerts.map(a=><div className={`alert-row ${severityTone(a.severidad)}`} key={a.codigo}><AlertTriangle size={18}/><div><strong>{a.modulo}</strong><p>{a.mensaje}</p></div><span>{a.severidad}</span></div>):<div className="positive-state"><ShieldCheck/><strong>Operación sin alertas críticas</strong></div>}</div> }
 function Ranking({title,rows}:{title:string;rows:RankingRow[]}) { return <Panel title={title} kicker="RANKING RÁPIDO"><div className="table-wrap"><table><thead><tr><th>Fecha</th><th>Tipo</th><th>Ton</th><th>Costo/T</th><th>AC30 kg/T</th><th>gal/T</th></tr></thead><tbody>{rows.map(r=><tr key={r.codigo}><td>{r.fecha}</td><td>{r.tipo_mezcla}</td><td>{fmt.format(r.toneladas)}</td><td>{fmt.format(r.costo_ton)}</td><td>{fmt.format(r.ac30_kg_ton)}</td><td>{fmt.format(r.diesel_gal_ton)}</td></tr>)}</tbody></table>{!rows.length&&<div className="empty">Sin datos de ranking publicados.</div>}</div></Panel> }
 function RecentReports({reports}:{reports:Report[]}) { return <div className="recent-reports">{reports.map(r=><a href={r.archivo_url} target="_blank" rel="noreferrer" key={r.id}><span className={r.formato==='PDF'?'pdf':'excel'}>{r.formato==='PDF'?<FileText/>:<FileSpreadsheet/>}</span><div><strong>{r.titulo}</strong><small>{r.categoria} · {r.periodo||'Sin periodo'} · {dateFmt.format(new Date(r.fecha_publicacion))}</small></div><ChevronRight/></a>)}</div> }
