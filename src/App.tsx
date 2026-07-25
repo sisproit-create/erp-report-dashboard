@@ -151,9 +151,10 @@ function ChartTooltip({active,payload,label}:any){if(!active||!payload?.length)r
 
 function Executive({summary:s,series,equipment,rankings,alerts,reports,loadIssues}:{summary:Summary|null;series:SeriesRow[];equipment:EquipmentRow[];rankings:RankingRow[];alerts:AlertRow[];reports:Report[];loadIssues:string[]}) {
   if(!s) return <EmptySetup/>;
-  const featured=reports.filter(r=>r.destacado).sort((a,b)=>(a.orden_destacado??99)-(b.orden_destacado??99));
-  const periodReports=reports.filter(r=>r.periodo===s.periodo && r.formato==='PDF');
-  const reportFive=(featured.length?featured:periodReports.length?periodReports:reports).slice(0,5);
+  const reportFive=reports
+    .filter(report=>report.destacado===true && report.orden_destacado!==null && report.orden_destacado!==undefined)
+    .sort((a,b)=>(a.orden_destacado??999)-(b.orden_destacado??999))
+    .slice(0,5);
   return <>
     {loadIssues.length>0&&<div className="diagnostic-banner"><AlertTriangle/><div><strong>Sincronización incompleta</strong><span>{loadIssues.join(' · ')}</span></div></div>}
     {series.length===0&&<div className="diagnostic-banner warn"><Activity/><div><strong>Tendencias pendientes</strong><span>El resumen ejecutivo está disponible, pero no hay filas para el periodo {s.periodo}. Vuelve a publicar desde el ERP actualizado.</span></div></div>}
@@ -197,7 +198,7 @@ function Executive({summary:s,series,equipment,rankings,alerts,reports,loadIssue
       <Ranking title="Top 5 más eficientes" rows={rankings.filter(r=>r.tipo_ranking==='eficiente').slice(0,5)}/>
       <Ranking title="Top 5 mayor costo" rows={rankings.filter(r=>r.tipo_ranking==='mayor_costo').slice(0,5)}/>
     </div>
-    <Panel title="Últimos 5 reportes disponibles" kicker="DOCUMENTOS PUBLICADOS"><RecentReports reports={reportFive}/><div className="panel-foot">La biblioteca completa está disponible únicamente en el módulo Reportes.</div></Panel>
+    <Panel title="Reportes seleccionados para el Resumen Ejecutivo" kicker="DOCUMENTOS PUBLICADOS">{reportFive.length>0?<RecentReports reports={reportFive}/>:<div className="empty">No hay reportes seleccionados desde el ERP.</div>}<div className="panel-foot">Esta sección muestra únicamente los reportes marcados en el ERP, respetando el orden configurado del 1 al 5.</div></Panel>
   </>;
 }
 
@@ -251,11 +252,15 @@ function AlertsPage({alerts}:{alerts:AlertRow[]}) { return <>
 
 function ReportsPage({reports,categories,query,setQuery,category,setCategory}:{reports:Report[];categories:string[];query:string;setQuery:(v:string)=>void;category:string;setCategory:(v:string)=>void}) {
   const searchActive=query.trim().length>0 || category!=='Todas';
-  const visibleReports=searchActive ? reports : reports.slice(0,5);
-  const panelTitle=searchActive ? 'Resultados de búsqueda' : 'Últimos 5 reportes publicados';
+  const selectedReports=reports
+    .filter(report=>report.destacado===true && report.orden_destacado!==null && report.orden_destacado!==undefined)
+    .sort((a,b)=>(a.orden_destacado??999)-(b.orden_destacado??999))
+    .slice(0,5);
+  const visibleReports=searchActive ? reports : selectedReports;
+  const panelTitle=searchActive ? 'Resultados de búsqueda' : 'Reportes seleccionados para el Resumen Ejecutivo';
   return <>
-  <Interpretation title="¿Qué evidencia respalda los indicadores?" summary="La vista principal muestra únicamente los cinco reportes más recientes. Los documentos anteriores permanecen disponibles mediante la búsqueda y el filtro por categoría." points={[`Los cinco reportes se ordenan desde el momento de generación más reciente hasta el más antiguo.`,`Al escribir un título, fecha, periodo o nombre de archivo, el sistema consulta toda la biblioteca publicada.`,`El filtro por categoría también permite acceder a reportes anteriores sin saturar la vista principal.`]} action="usar la búsqueda cuando necesites consultar evidencia histórica o un reporte específico."/>
-  <Panel title={panelTitle} kicker="PDF Y EXCEL"><div className="report-tools"><label><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar por título, fecha, periodo o archivo…"/></label><select value={category} onChange={e=>setCategory(e.target.value)}>{categories.map(c=><option key={c}>{c}</option>)}</select></div><div className="report-grid">{visibleReports.map(r=><article className="report-card" key={r.id}><div className="report-card-head"><span className={r.formato==='PDF'?'pdf':'excel'}>{r.formato==='PDF'?<FileText/>:<FileSpreadsheet/>}</span><small>{r.formato}</small></div><h3>{r.titulo}</h3><p>{r.categoria} · {r.periodo||'Sin periodo'}</p><div><span>{new Date(r.created_at || r.fecha_publicacion).toLocaleString('es-PA',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span><a href={r.archivo_url} target="_blank" rel="noreferrer"><Download size={16}/>Abrir</a></div></article>)}</div>{!visibleReports.length&&<div className="empty">No hay reportes que coincidan con la búsqueda o el filtro seleccionado.</div>}{!searchActive&&reports.length>5&&<div className="panel-foot">Se muestran los 5 reportes más recientes. Utiliza la búsqueda o el filtro para consultar los {reports.length-5} reportes anteriores.</div>}</Panel>
+  <Interpretation title="¿Qué evidencia respalda los indicadores?" summary="La vista principal muestra únicamente los reportes seleccionados en el ERP para el Resumen Ejecutivo. Los demás documentos permanecen disponibles mediante la búsqueda y el filtro por categoría." points={[`La selección respeta el orden configurado del 1 al 5 en el ERP.`,`Si se seleccionan menos de cinco documentos, el portal muestra solamente esos documentos y no completa espacios automáticamente.`,`Al escribir un título, fecha, periodo o nombre de archivo, el sistema consulta toda la biblioteca publicada.`]} action="usar la selección del ERP para controlar la evidencia principal y la búsqueda para consultar documentos históricos."/>
+  <Panel title={panelTitle} kicker="PDF Y EXCEL"><div className="report-tools"><label><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar por título, fecha, periodo o archivo…"/></label><select value={category} onChange={e=>setCategory(e.target.value)}>{categories.map(c=><option key={c}>{c}</option>)}</select></div><div className="report-grid">{visibleReports.map(r=><article className="report-card" key={r.id}><div className="report-card-head"><span className={r.formato==='PDF'?'pdf':'excel'}>{r.formato==='PDF'?<FileText/>:<FileSpreadsheet/>}</span><small>{r.formato}</small></div><h3>{r.titulo}</h3><p>{r.categoria} · {r.periodo||'Sin periodo'}</p><div><span>{new Date(r.created_at || r.fecha_publicacion).toLocaleString('es-PA',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span><a href={r.archivo_url} target="_blank" rel="noreferrer"><Download size={16}/>Abrir</a></div></article>)}</div>{!visibleReports.length&&<div className="empty">{searchActive?'No hay reportes que coincidan con la búsqueda o el filtro seleccionado.':'No hay reportes seleccionados desde el ERP.'}</div>}{!searchActive&&<div className="panel-foot">Se muestran únicamente los reportes seleccionados en el ERP. Utiliza la búsqueda o el filtro para consultar el resto de la biblioteca.</div>}</Panel>
 </> }
 
 function EmptySetup(){return <div className="empty-setup"><Boxes/><h2>El portal está listo para recibir datos gerenciales</h2><p>Ejecuta el SQL incluido en <code>supabase/schema.sql</code> y luego presiona “Actualizar dashboard” desde el ERP.</p></div>}
