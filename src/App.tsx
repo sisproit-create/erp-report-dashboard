@@ -32,15 +32,15 @@ const dateFmt = new Intl.DateTimeFormat('es-PA', { day:'2-digit', month:'short',
 const shortDate = new Intl.DateTimeFormat('es-PA', { day:'2-digit', month:'short' });
 const INVALID_REPORT = /(template|plantilla|borrador|demo|test|sample|ejemplo|core_v2|mock|draft)/i;
 
-const NAV: {key:ViewKey; label:string; icon:any}[] = [
-  { key:'resumen', label:'Resumen Ejecutivo', icon:BarChart3 },
-  { key:'produccion', label:'Producción', icon:Factory },
-  { key:'combustible', label:'Combustible', icon:Fuel },
-  { key:'ac30', label:'AC30 y Laboratorio', icon:Droplets },
-  { key:'equipos', label:'Equipos HYUNDAI', icon:Truck },
-  { key:'costos', label:'Costos y Ranking', icon:CircleDollarSign },
-  { key:'reportes', label:'Reportes', icon:FolderOpen },
-  { key:'alertas', label:'Alertas', icon:AlertTriangle },
+const NAV: {key:ViewKey; label:string; path:string; description:string; icon:any}[] = [
+  { key:'resumen', label:'Resumen Ejecutivo', path:'/resumen', description:'Control consolidado de producción, costos, consumos, laboratorio y reportes del ERP.', icon:BarChart3 },
+  { key:'produccion', label:'Producción', path:'/produccion', description:'Toneladas, corridas, promedio operativo y comportamiento diario de la planta.', icon:Factory },
+  { key:'combustible', label:'Combustible', path:'/combustible', description:'Consumo de diésel, transferencias internas y eficiencia por tonelada.', icon:Fuel },
+  { key:'ac30', label:'AC30 y Laboratorio', path:'/ac30-laboratorio', description:'Dosificación de ligante, muestras de laboratorio y control de vacíos.', icon:Droplets },
+  { key:'equipos', label:'Equipos HYUNDAI', path:'/equipos', description:'Distribución del combustible y costo mensual por equipo operativo.', icon:Truck },
+  { key:'costos', label:'Costos y Ranking', path:'/costos-ranking', description:'Costo gerencial por tonelada, margen estimado y ranking de desempeño.', icon:CircleDollarSign },
+  { key:'reportes', label:'Reportes', path:'/reportes', description:'Biblioteca central de documentos PDF y Excel publicados desde el ERP.', icon:FolderOpen },
+  { key:'alertas', label:'Alertas', path:'/alertas', description:'Condiciones operativas que requieren validación o atención gerencial.', icon:AlertTriangle },
 ];
 
 function safe<T>(result: {data:T|null; error:any}): T | null { return result.error ? null : result.data; }
@@ -49,7 +49,7 @@ function healthTone(value:string) { const v=(value||'').toUpperCase(); return v.
 function severityTone(value:string) { return value==='critica' ? 'danger' : value==='advertencia' ? 'warn' : 'info'; }
 
 function App() {
-  const [view,setView]=useState<ViewKey>('resumen');
+  const [pathname,setPathname]=useState(window.location.pathname);
   const [mobileOpen,setMobileOpen]=useState(false);
   const [loading,setLoading]=useState(true);
   const [reports,setReports]=useState<Report[]>([]);
@@ -62,6 +62,9 @@ function App() {
   const [query,setQuery]=useState('');
   const [category,setCategory]=useState('Todas');
   const [loadIssues,setLoadIssues]=useState<string[]>([]);
+
+  const activeNav = NAV.find(item => item.path === pathname) ?? NAV[0];
+  const navigate = (path:string) => { if (window.location.pathname !== path) window.history.pushState({}, '', path); setPathname(path); };
 
   async function load() {
     setLoading(true);
@@ -87,7 +90,14 @@ function App() {
     setAlerts((safe<AlertRow[]>(al) ?? []).filter(x=>!period||x.periodo===period));
     setLoading(false);
   }
-  useEffect(()=>{ load(); },[]);
+
+  useEffect(()=>{ if (window.location.pathname === '/' || !NAV.some(item=>item.path===window.location.pathname)) { window.history.replaceState({}, '', '/resumen'); setPathname('/resumen'); } load(); },[]);
+  useEffect(()=>{ const onPop=()=>setPathname(window.location.pathname); window.addEventListener('popstate',onPop); return()=>window.removeEventListener('popstate',onPop); },[]);
+  useEffect(()=>{ setMobileOpen(false); window.scrollTo({top:0, behavior:'smooth'}); },[pathname]);
+  useEffect(()=>{
+    document.body.classList.toggle('drawer-open', mobileOpen);
+    return ()=>document.body.classList.remove('drawer-open');
+  },[mobileOpen]);
 
   const latestUpdate=summary?.fecha_actualizacion || indicators[0]?.fecha_actualizacion;
   const filteredReports=useMemo(()=>reports.filter(r=>{
@@ -96,31 +106,35 @@ function App() {
   }),[reports,query,category]);
   const categories=['Todas',...Array.from(new Set(reports.map(r=>r.categoria))).sort()];
 
+  const routedPage = pathname === '/produccion' ? <Production summary={summary} series={series}/>
+    : pathname === '/combustible' ? <FuelPage summary={summary} series={series} equipment={equipment}/>
+    : pathname === '/ac30-laboratorio' ? <AC30Page summary={summary} series={series}/>
+    : pathname === '/equipos' ? <EquipmentPage equipment={equipment}/>
+    : pathname === '/costos-ranking' ? <CostsPage summary={summary} series={series} rankings={rankings}/>
+    : pathname === '/reportes' ? <ReportsPage reports={filteredReports} categories={categories} query={query} setQuery={setQuery} category={category} setCategory={setCategory}/>
+    : pathname === '/alertas' ? <AlertsPage alerts={alerts}/>
+    : <Executive summary={summary} series={series} equipment={equipment} rankings={rankings} alerts={alerts} reports={reports} loadIssues={loadIssues}/>;
+
+  const pageRoutes = loading ? <div className="loading">Sincronizando información del ERP…</div> : routedPage;
+
   return <div className="app-shell">
+    {mobileOpen && <button className="mobile-overlay" aria-label="Cerrar menú" onClick={()=>setMobileOpen(false)} />}
     <aside className={`sidebar ${mobileOpen?'open':''}`}>
-      <div className="brand"><div className="brand-icon"><Factory/></div><div><strong>SAS SmartPlant</strong><span>Executive Portal</span></div></div>
+      <div className="brand"><div className="brand-icon"><Factory/></div><div><strong>SAS SmartPlant</strong><span>Executive Portal V4</span></div></div>
       <div className="plant-card"><Factory size={17}/><div><small>Planta activa</small><strong>DMI · Panamá</strong></div><span>ONLINE</span></div>
-      <nav>{NAV.map(item=>{const Icon=item.icon; return <button key={item.key} className={view===item.key?'active':''} onClick={()=>{setView(item.key);setMobileOpen(false)}}><Icon size={19}/><span>{item.label}</span>{view===item.key&&<i/>}</button>})}</nav>
+      <nav>{NAV.map(item=>{const Icon=item.icon; const active=activeNav.key===item.key; return <button key={item.key} className={active?'active':''} onClick={()=>navigate(item.path)}><Icon size={19}/><span>{item.label}</span>{active&&<i/>}</button>})}</nav>
       <div className="sidebar-footer"><small>Última sincronización</small><strong>{latestUpdate?new Date(latestUpdate).toLocaleString('es-PA'):'Pendiente'}</strong><span><i/> Supabase conectado</span></div>
     </aside>
     <main>
-      <header className="topbar"><button className="mobile-menu" onClick={()=>setMobileOpen(!mobileOpen)}>{mobileOpen?<X/>:<Menu/>}</button><div><span className="eyebrow">SAS SMARTPLANT · EXECUTIVE PORTAL</span><h1>{NAV.find(n=>n.key===view)?.label}</h1><p>{view==='resumen'?'Control consolidado de producción, costos, consumos, laboratorio y reportes del ERP.':'Información operativa publicada directamente desde el ERP.'}</p></div><div className="top-actions"><div className="period"><small>Periodo de referencia</small><strong>{summary?.periodo ?? 'Sin datos'}</strong></div><button onClick={load}><RefreshCw size={18}/>Actualizar</button></div></header>
-      <div className="content">
-        {loading?<div className="loading">Sincronizando información del ERP…</div>:
-          view==='resumen'?<Executive summary={summary} series={series} equipment={equipment} rankings={rankings} alerts={alerts} reports={reports} loadIssues={loadIssues}/>:
-          view==='produccion'?<Production summary={summary} series={series}/>:
-          view==='combustible'?<FuelPage summary={summary} series={series} equipment={equipment}/>:
-          view==='ac30'?<AC30Page summary={summary} series={series}/>:
-          view==='equipos'?<EquipmentPage equipment={equipment}/>:
-          view==='costos'?<CostsPage summary={summary} series={series} rankings={rankings}/>:
-          view==='alertas'?<AlertsPage alerts={alerts}/>:
-          <ReportsPage reports={filteredReports} categories={categories} query={query} setQuery={setQuery} category={category} setCategory={setCategory}/>
-        }
-      </div>
+      <header className="topbar">
+        <button className="mobile-menu" aria-label="Abrir menú" onClick={()=>setMobileOpen(!mobileOpen)}>{mobileOpen?<X/>:<Menu/>}</button>
+        <div className="topbar-copy"><span className="eyebrow">SAS SMARTPLANT · EXECUTIVE PORTAL</span><h1>{activeNav.label}</h1><p>{activeNav.description}</p></div>
+        <div className="top-actions"><div className="period"><small>Periodo de referencia</small><strong>{summary?.periodo ?? 'Sin datos'}</strong></div><button onClick={load}><RefreshCw size={18}/><span>Actualizar</span></button></div>
+      </header>
+      <div className="content">{pageRoutes}</div>
     </main>
   </div>;
 }
-
 function Metric({label,value,sub,icon:Icon,tone='neutral'}:{label:string;value:string;sub?:string;icon:any;tone?:string}) {
   return <article className={`metric ${tone}`}><div className="metric-head"><span><Icon size={18}/></span><small>{label}</small></div><strong>{value}</strong>{sub&&<p>{sub}</p>}</article>;
 }
