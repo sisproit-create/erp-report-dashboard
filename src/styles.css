@@ -69,3 +69,31 @@ main, .sidebar { position: relative; z-index: 1; }
 .recent-reports a { transition: transform .18s ease, background .18s ease, border-color .18s ease; }
 .recent-reports a:hover { transform: translateX(4px); background:rgba(24,185,242,.07); border-color:rgba(24,185,242,.28); }
 .sidebar nav button.active { box-shadow: inset 3px 0 0 #18b9f2, 0 8px 26px rgba(24,185,242,.12); }
+
+/* V5 Enterprise · mobile viewport, safe areas and managerial interpretation */
+html,body,#root{min-height:100%;}
+body{min-height:100dvh;overflow-x:hidden;}
+.app-shell{min-height:100dvh;}
+.mobile-overlay{position:fixed;inset:0;border:0;background:rgba(0,5,12,.68);backdrop-filter:blur(3px);z-index:19;}
+body.drawer-open{overflow:hidden;touch-action:none;}
+.interpretation-card{display:grid;grid-template-columns:auto 1fr;gap:15px;margin:0 0 18px;padding:18px 20px;border:1px solid rgba(24,185,242,.28);border-radius:17px;background:linear-gradient(135deg,rgba(6,42,62,.92),rgba(5,22,35,.94));box-shadow:0 18px 45px rgba(0,0,0,.15)}
+.interpretation-icon{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:#1ed0ff;background:#073752;border:1px solid #0a5877}
+.interpretation-copy>span{color:#20ccf7;font-size:9px;font-weight:800;letter-spacing:.18em}
+.interpretation-copy h3{font-family:Rajdhani,sans-serif;font-size:21px;margin:5px 0 7px;color:#f0f7fc}
+.interpretation-copy p{margin:0 0 9px;color:#a6bbca;font-size:12px;line-height:1.55}
+.interpretation-copy ul{margin:0 0 10px;padding-left:18px;color:#819aab;font-size:11px;line-height:1.6}
+.interpretation-copy strong{display:block;color:#8fe6ff;font-size:11px;font-weight:600}
+@media(max-width:800px){
+  .sidebar{height:100dvh;padding-top:max(20px,env(safe-area-inset-top));padding-bottom:max(18px,env(safe-area-inset-bottom));overflow-y:auto}
+  .topbar{position:sticky;top:0;z-index:12;background:rgba(2,8,23,.92);backdrop-filter:blur(14px);padding-top:max(18px,env(safe-area-inset-top));}
+  .content{padding-bottom:max(34px,calc(env(safe-area-inset-bottom) + 20px));}
+  .interpretation-card{grid-template-columns:1fr;padding:16px;margin-top:2px}
+  .interpretation-icon{width:38px;height:38px}
+}
+@media(max-width:520px){
+  .health-grid,.metrics-grid.five,.metrics-grid.four{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .metric{padding:14px;min-height:118px}.metric>strong{font-size:22px}.metric-head small{font-size:8px}
+  .topbar h1{font-size:31px}.topbar-copy{min-width:0}.top-actions button span{display:none}.top-actions button{padding:12px 14px}
+  .report-card h3{min-height:auto}.panel-head{padding:17px}.report-tools{padding:14px}.report-grid{padding:0 14px 16px}
+}
+@media(max-width:360px){.health-grid,.metrics-grid.five,.metrics-grid.four{grid-template-columns:1fr}}
