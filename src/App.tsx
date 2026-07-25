@@ -108,8 +108,9 @@ function App() {
 
   const latestUpdate=summary?.fecha_actualizacion || indicators[0]?.fecha_actualizacion;
   const filteredReports=useMemo(()=>reports.filter(r=>{
-    const text=`${r.titulo} ${r.categoria} ${r.periodo}`.toLowerCase();
-    return (!query||text.includes(query.toLowerCase())) && (category==='Todas'||r.categoria===category);
+    const text=`${r.titulo} ${r.archivo_nombre} ${r.categoria} ${r.periodo} ${r.fecha_publicacion} ${r.created_at ?? ''}`.toLowerCase();
+    const normalizedQuery=query.trim().toLowerCase();
+    return (!normalizedQuery||text.includes(normalizedQuery)) && (category==='Todas'||r.categoria===category);
   }),[reports,query,category]);
   const categories=['Todas',...Array.from(new Set(reports.map(r=>r.categoria))).sort()];
 
@@ -248,9 +249,13 @@ function AlertsPage({alerts}:{alerts:AlertRow[]}) { return <>
   <Panel title="Alertas y cierre operativo" kicker="MONITOREO"><AlertList alerts={alerts}/></Panel>
 </> }
 
-function ReportsPage({reports,categories,query,setQuery,category,setCategory}:{reports:Report[];categories:string[];query:string;setQuery:(v:string)=>void;category:string;setCategory:(v:string)=>void}) { return <>
-  <Interpretation title="¿Qué evidencia respalda los indicadores?" summary="La biblioteca reúne los documentos publicados desde el ERP y los ordena desde el más reciente hasta el más antiguo." points={[`La fecha mostrada corresponde al momento real de generación cuando existe created_at.`,`Los filtros permiten localizar documentos por título, categoría o periodo.`,`El dashboard identifica la desviación; el reporte aporta el detalle y respaldo documental.`]} action="abrir el reporte relacionado con cualquier variación relevante antes de tomar una decisión."/>
-  <Panel title="Biblioteca completa de reportes" kicker="PDF Y EXCEL"><div className="report-tools"><label><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar reporte, categoría o periodo…"/></label><select value={category} onChange={e=>setCategory(e.target.value)}>{categories.map(c=><option key={c}>{c}</option>)}</select></div><div className="report-grid">{reports.map(r=><article className="report-card" key={r.id}><div className="report-card-head"><span className={r.formato==='PDF'?'pdf':'excel'}>{r.formato==='PDF'?<FileText/>:<FileSpreadsheet/>}</span><small>{r.formato}</small></div><h3>{r.titulo}</h3><p>{r.categoria} · {r.periodo||'Sin periodo'}</p><div><span>{new Date(r.created_at || r.fecha_publicacion).toLocaleString('es-PA',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span><a href={r.archivo_url} target="_blank" rel="noreferrer"><Download size={16}/>Abrir</a></div></article>)}</div>{!reports.length&&<div className="empty">No hay reportes que coincidan con los filtros.</div>}</Panel>
+function ReportsPage({reports,categories,query,setQuery,category,setCategory}:{reports:Report[];categories:string[];query:string;setQuery:(v:string)=>void;category:string;setCategory:(v:string)=>void}) {
+  const searchActive=query.trim().length>0 || category!=='Todas';
+  const visibleReports=searchActive ? reports : reports.slice(0,5);
+  const panelTitle=searchActive ? 'Resultados de búsqueda' : 'Últimos 5 reportes publicados';
+  return <>
+  <Interpretation title="¿Qué evidencia respalda los indicadores?" summary="La vista principal muestra únicamente los cinco reportes más recientes. Los documentos anteriores permanecen disponibles mediante la búsqueda y el filtro por categoría." points={[`Los cinco reportes se ordenan desde el momento de generación más reciente hasta el más antiguo.`,`Al escribir un título, fecha, periodo o nombre de archivo, el sistema consulta toda la biblioteca publicada.`,`El filtro por categoría también permite acceder a reportes anteriores sin saturar la vista principal.`]} action="usar la búsqueda cuando necesites consultar evidencia histórica o un reporte específico."/>
+  <Panel title={panelTitle} kicker="PDF Y EXCEL"><div className="report-tools"><label><Search size={18}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar por título, fecha, periodo o archivo…"/></label><select value={category} onChange={e=>setCategory(e.target.value)}>{categories.map(c=><option key={c}>{c}</option>)}</select></div><div className="report-grid">{visibleReports.map(r=><article className="report-card" key={r.id}><div className="report-card-head"><span className={r.formato==='PDF'?'pdf':'excel'}>{r.formato==='PDF'?<FileText/>:<FileSpreadsheet/>}</span><small>{r.formato}</small></div><h3>{r.titulo}</h3><p>{r.categoria} · {r.periodo||'Sin periodo'}</p><div><span>{new Date(r.created_at || r.fecha_publicacion).toLocaleString('es-PA',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span><a href={r.archivo_url} target="_blank" rel="noreferrer"><Download size={16}/>Abrir</a></div></article>)}</div>{!visibleReports.length&&<div className="empty">No hay reportes que coincidan con la búsqueda o el filtro seleccionado.</div>}{!searchActive&&reports.length>5&&<div className="panel-foot">Se muestran los 5 reportes más recientes. Utiliza la búsqueda o el filtro para consultar los {reports.length-5} reportes anteriores.</div>}</Panel>
 </> }
 
 function EmptySetup(){return <div className="empty-setup"><Boxes/><h2>El portal está listo para recibir datos gerenciales</h2><p>Ejecuta el SQL incluido en <code>supabase/schema.sql</code> y luego presiona “Actualizar dashboard” desde el ERP.</p></div>}
