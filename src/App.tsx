@@ -9,6 +9,7 @@ import {
   Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import { supabase } from './lib/supabase';
+import { LiveOperationsCenter } from './v6/components/LiveOperationsCenter';
 
 type ViewKey = 'resumen' | 'produccion' | 'combustible' | 'ac30' | 'equipos' | 'costos' | 'reportes' | 'alertas';
 type Report = { id:string; titulo:string; descripcion:string|null; categoria:string; periodo:string|null; formato:string; archivo_nombre:string; archivo_url:string; archivo_size:number; fecha_publicacion:string; created_at?:string|null; destacado?:boolean; orden_destacado?:number|null };
@@ -128,7 +129,7 @@ function App() {
   return <div className="app-shell">
     {mobileOpen && <button className="mobile-overlay" aria-label="Cerrar menú" onClick={()=>setMobileOpen(false)} />}
     <aside className={`sidebar ${mobileOpen?'open':''}`}>
-      <div className="brand"><div className="brand-icon"><Factory/></div><div><strong>SAS SmartPlant</strong><span>Executive Portal V5 Enterprise</span></div></div>
+      <div className="brand"><div className="brand-icon"><Factory/></div><div><strong>SAS SmartPlant</strong><span>Executive Portal V6 · Live Operations Center</span></div></div>
       <div className="plant-card"><Factory size={17}/><div><small>Planta activa</small><strong>DMI · Panamá</strong></div><span>ONLINE</span></div>
       <nav>{NAV.map(item=>{const Icon=item.icon; const active=activeNav.key===item.key; return <button key={item.key} className={active?'active':''} onClick={()=>navigate(item.path)}><Icon size={19}/><span>{item.label}</span>{active&&<i/>}</button>})}</nav>
       <div className="sidebar-footer"><small>Última sincronización</small><strong>{latestUpdate?new Date(latestUpdate).toLocaleString('es-PA'):'Pendiente'}</strong><span><i/> Supabase conectado</span></div>
@@ -155,9 +156,12 @@ function Executive({summary:s,series,equipment,rankings,alerts,reports,loadIssue
     .filter(report=>report.destacado===true && report.orden_destacado!==null && report.orden_destacado!==undefined)
     .sort((a,b)=>(a.orden_destacado??999)-(b.orden_destacado??999))
     .slice(0,5);
+  const latestUpdate=s.fecha_actualizacion;
   return <>
     {loadIssues.length>0&&<div className="diagnostic-banner"><AlertTriangle/><div><strong>Sincronización incompleta</strong><span>{loadIssues.join(' · ')}</span></div></div>}
     {series.length===0&&<div className="diagnostic-banner warn"><Activity/><div><strong>Tendencias pendientes</strong><span>El resumen ejecutivo está disponible, pero no hay filas para el periodo {s.periodo}. Vuelve a publicar desde el ERP actualizado.</span></div></div>}
+    <LiveOperationsCenter summary={s} series={series} alerts={alerts} reports={reports} latestUpdate={latestUpdate}/>
+    <div className="section-title v6-section-title"><span>EXECUTIVE SCORE ENGINE</span><h2>Indicadores ejecutivos</h2></div>
     <div className="health-grid">
       <Metric label="Salud del negocio" value={`${s.salud} · ${fmt.format(s.puntaje)}/100`} icon={ShieldCheck} tone={healthTone(s.salud)}/>
       <Metric label="Costo/T gerencial" value={`${money.format(s.costo_total_ton)}/T`} icon={CircleDollarSign}/>
