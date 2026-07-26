@@ -438,3 +438,24 @@ main{
 @media(max-width:1100px){.v6-status-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){.v6-live-center{border-radius:17px}.v6-live-hero{padding:17px;align-items:flex-start}.v6-live-hero h2{font-size:22px}.v6-live-hero p{font-size:11px}.v6-live-clock{min-width:112px;padding:10px}.v6-live-clock strong{font-size:16px}.v6-status-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px;gap:10px}.v6-status-card{padding:13px;min-height:112px}.v6-status-card>strong{font-size:19px}.v6-live-lower{grid-template-columns:1fr}.v6-activity-feed{border-left:0;border-top:1px solid #123d53}.v6-insights,.v6-activity-feed{padding:17px}.v6-section-title{align-items:flex-start;flex-direction:column;gap:5px}}
 @media(max-width:390px){.v6-live-hero{display:grid;grid-template-columns:1fr}.v6-live-clock{width:100%}.v6-status-grid{grid-template-columns:1fr}}
+
+/* =========================================================
+   SAS SMARTPLANT V6.1 · EXPLICIT KPI REFERENCES
+   ========================================================= */
+.v61-comparison{display:flex;flex-direction:column;gap:4px;margin-top:7px;padding-top:7px;border-top:1px solid rgba(82,137,163,.22)}
+.v61-comparison>span{display:flex;align-items:center;gap:5px;color:#b9cad5;font-size:10px;line-height:1.25}
+.v61-comparison>span strong{font-size:10px;color:#dff7ff}
+.v61-comparison>small{color:#708b9e;font-size:8px;line-height:1.35}
+.v61-comparison>small b{font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.v61-comparison.optimal svg,.v61-comparison.optimal small b{color:#36ddb1}
+.v61-comparison.attention svg,.v61-comparison.attention small b{color:#f1ba49}
+.v61-comparison.critical svg,.v61-comparison.critical small b{color:#ff657d}
+.v61-comparison.neutral svg,.v61-comparison.neutral small b{color:#7f9bad}
+.v61-reference-note{display:flex;align-items:flex-start;gap:9px;margin:0 20px 18px;padding:10px 13px;border:1px solid rgba(25,199,251,.18);border-radius:12px;background:rgba(5,48,67,.55);color:#86a1b3;font-size:9px;line-height:1.45}
+.v61-reference-note svg{flex:0 0 auto;color:#19c7fb;margin-top:1px}
+@media(max-width:760px){
+  .v61-comparison>span{align-items:flex-start;font-size:9px}
+  .v61-comparison>span strong{font-size:9px}
+  .v61-comparison>small{font-size:7.5px}
+  .v61-reference-note{margin:0 12px 12px;font-size:8px}
+}

@@ -1,15 +1,28 @@
-import { Activity, AlertTriangle, CheckCircle2, Clock3, Database, Factory, FileText, Gauge, Radio, RefreshCw, TrendingDown, TrendingUp } from 'lucide-react';
+import {
+  Activity, AlertTriangle, CheckCircle2, Clock3, Database, Factory, FileText,
+  Gauge, Radio, RefreshCw, TrendingDown, TrendingUp,
+} from 'lucide-react';
 import { useLiveClock } from '../hooks/useLiveClock';
-import { calculateTrend } from '../utils/trends';
+import { compareWithPrevious, compareWithPriorAverage, type Comparison } from '../utils/trends';
 
 type Props = { summary:any; series:any[]; alerts:any[]; reports:any[]; latestUpdate?:string };
 const fmt = new Intl.NumberFormat('es-PA', { maximumFractionDigits: 2 });
 const money = new Intl.NumberFormat('es-PA', { style:'currency', currency:'USD', maximumFractionDigits:2 });
 
-function TrendBadge({values,positiveWhenHigher=true}:{values:number[];positiveWhenHigher?:boolean}){
-  const trend=calculateTrend(values,positiveWhenHigher);
-  const Icon=trend.direction==='up'?TrendingUp:trend.direction==='down'?TrendingDown:Activity;
-  return <span className={`v6-trend ${trend.direction} ${trend.favorable?'good':'review'}`}><Icon size={14}/>{trend.percent.toFixed(1)}% · {trend.favorable?'Favorable':'Revisar'}</span>;
+function signed(value:number, unit='') {
+  const prefix = value > 0 ? '+' : value < 0 ? '−' : '';
+  return `${prefix}${fmt.format(Math.abs(value))}${unit}`;
+}
+
+function ComparisonBadge({comparison,unit,referenceText}:{comparison:Comparison;unit?:string;referenceText:string}){
+  const Icon = comparison.direction === 'up' ? TrendingUp : comparison.direction === 'down' ? TrendingDown : Activity;
+  if (comparison.reference === null) {
+    return <div className="v61-comparison neutral"><span><Icon size={14}/> Sin referencia suficiente</span><small>Se requieren al menos dos registros.</small></div>;
+  }
+  return <div className={`v61-comparison ${comparison.status}`}>
+    <span><Icon size={14}/><strong>{signed(comparison.delta,unit)}</strong> · {comparison.percent.toFixed(1)}%</span>
+    <small>{referenceText} · <b>{comparison.statusLabel}</b></small>
+  </div>;
 }
 
 export function LiveOperationsCenter({summary,series,alerts,reports,latestUpdate}:Props){
@@ -19,24 +32,31 @@ export function LiveOperationsCenter({summary,series,alerts,reports,latestUpdate
   const warnings=alerts.filter(a=>String(a.severidad).toLowerCase()==='advertencia').length;
   const prioritized=reports.filter(r=>r.destacado===true).length;
   const updateDate=latestUpdate?new Date(latestUpdate):null;
+
+  const productionComparison=compareWithPrevious(series.map(x=>Number(x.toneladas)),true);
+  const costComparison=compareWithPriorAverage(series.map(x=>Number(x.costo_ton)),false);
+  const dieselComparison=compareWithPriorAverage(series.map(x=>Number(x.diesel_gal_ton)),false);
+
   const events=[
     {icon:Database,title:'Dashboard sincronizado',detail:updateDate?updateDate.toLocaleString('es-PA'):'Pendiente'},
     {icon:Factory,title:'Último registro de producción',detail:latest?`${latest.fecha} · ${fmt.format(latest.toneladas)} t`:'Sin registro'},
     {icon:FileText,title:'Reportes ejecutivos activos',detail:`${prioritized} seleccionados desde el ERP`},
     {icon:AlertTriangle,title:'Monitoreo de alertas',detail:`${critical} críticas · ${warnings} advertencias`},
   ];
+
   return <section className="v6-live-center">
     <div className="v6-live-hero">
-      <div><span className="v6-live-label"><Radio size={15}/> LIVE OPERATIONS CENTER</span><h2>DMI Panamá · Estado operativo</h2><p>Lectura consolidada de producción, eficiencia, costos, calidad y actividad del portal.</p></div>
+      <div><span className="v6-live-label"><Radio size={15}/> LIVE OPERATIONS CENTER · V6.1</span><h2>DMI Panamá · Estado operativo</h2><p>Lectura consolidada de producción, eficiencia, costos, calidad y actividad del portal.</p></div>
       <div className="v6-live-clock"><Clock3 size={18}/><strong>{now.toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit'})}</strong><span>{now.toLocaleDateString('es-PA',{day:'2-digit',month:'short',year:'numeric'})}</span></div>
     </div>
     <div className="v6-status-grid">
       <article className="v6-status-card live"><span><CheckCircle2/> Planta</span><strong>ONLINE</strong><small>Operación conectada</small></article>
-      <article className="v6-status-card"><span><Factory/> Última producción</span><strong>{latest?`${fmt.format(latest.toneladas)} t`:'—'}</strong><TrendBadge values={series.map(x=>Number(x.toneladas))}/></article>
-      <article className="v6-status-card"><span><Gauge/> Costo/T</span><strong>{money.format(summary.costo_total_ton)}/T</strong><TrendBadge values={series.map(x=>Number(x.costo_ton))} positiveWhenHigher={false}/></article>
-      <article className="v6-status-card"><span><RefreshCw/> Diésel</span><strong>{fmt.format(summary.diesel_ton)} gal/T</strong><TrendBadge values={series.map(x=>Number(x.diesel_gal_ton))} positiveWhenHigher={false}/></article>
+      <article className="v6-status-card"><span><Factory/> Última producción</span><strong>{latest?`${fmt.format(latest.toneladas)} t`:'—'}</strong><ComparisonBadge comparison={productionComparison} unit=" t" referenceText="vs corrida anterior"/></article>
+      <article className="v6-status-card"><span><Gauge/> Costo/T</span><strong>{money.format(summary.costo_total_ton)}/T</strong><ComparisonBadge comparison={costComparison} unit=" USD/T" referenceText="último día vs promedio previo"/></article>
+      <article className="v6-status-card"><span><RefreshCw/> Diésel</span><strong>{fmt.format(summary.diesel_ton)} gal/T</strong><ComparisonBadge comparison={dieselComparison} unit=" gal/T" referenceText="último día vs promedio previo"/></article>
       <article className={`v6-status-card ${critical?'critical':warnings?'warning':'live'}`}><span><AlertTriangle/> Alertas</span><strong>{critical+warnings}</strong><small>{critical?`${critical} críticas`:warnings?`${warnings} requieren atención`:'Sin alertas relevantes'}</small></article>
     </div>
+    <div className="v61-reference-note"><Activity size={15}/><span>Las variaciones ahora indican el valor comparado, la referencia utilizada y el estado operativo. Producción se compara con la corrida anterior; costo y diésel con el promedio de los registros previos del periodo.</span></div>
     <div className="v6-live-lower">
       <div className="v6-insights"><span className="v6-panel-kicker">EXECUTIVE INSIGHTS</span><h3>Qué requiere atención ahora</h3><ul>
         <li>La salud ejecutiva se mantiene en <strong>{fmt.format(summary.puntaje)}/100</strong>.</li>
