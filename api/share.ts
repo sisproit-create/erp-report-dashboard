@@ -1,7 +1,7 @@
 const SITE_URL = 'https://portal.sisprollc.com';
 const PORTAL_URL = `${SITE_URL}/resumen`;
-const SHARE_URL = `${SITE_URL}/compartir?v=3`;
-const IMAGE_URL = `${SITE_URL}/og-smartplant-whatsapp-v3.jpg`;
+const SHARE_URL = `${SITE_URL}/compartir?v=4`;
+const IMAGE_URL = `${SITE_URL}/og-smartplant-whatsapp-v4.jpg`;
 
 function escapeHtml(value: string): string {
   return value
