@@ -1,59 +1,80 @@
-type Summary = { fecha_actualizacion?: string };
+const SITE_URL = 'https://sas-erp-reportes.vercel.app';
+const PORTAL_URL = `${SITE_URL}/`;
+const SHARE_URL = `${SITE_URL}/compartir`;
+const IMAGE_URL = `${SITE_URL}/og-smartplant.jpg`;
 
-async function latestVersion(): Promise<string> {
-  const url = process.env.VITE_SUPABASE_URL;
-  const key = process.env.VITE_SUPABASE_ANON_KEY;
-  if (!url || !key) return String(Date.now());
-
-  try {
-    const response = await fetch(
-      `${url}/rest/v1/erp_dashboard_resumen?select=fecha_actualizacion&order=periodo.desc&limit=1`,
-      { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: 'no-store' },
-    );
-    if (!response.ok) return String(Date.now());
-    const rows = (await response.json()) as Summary[];
-    return encodeURIComponent(rows[0]?.fecha_actualizacion || String(Date.now()));
-  } catch {
-    return String(Date.now());
-  }
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
 }
 
-export default async function handler(req: any, res: any) {
-  const protocol = (req.headers['x-forwarded-proto'] as string) || 'https';
-  const host = req.headers.host || 'sas-erp-reportes.vercel.app';
-  const origin = `${protocol}://${host}`;
-  const version = await latestVersion();
-  const image = `${origin}/api/og?v=${version}`;
-  const portal = `${origin}/resumen`;
+export default function handler(_request: any, response: any): void {
   const title = 'SAS SmartPlant • Executive Portal';
-  const description = 'Supervise la planta desde cualquier lugar. Producción, costos, diésel, AC30 y calidad en tiempo real.';
+  const description =
+    'Supervise la planta desde cualquier lugar. Producción, costos, diésel, AC30 y calidad en tiempo real.';
 
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.setHeader('Cache-Control', 'no-store, max-age=0');
-  res.status(200).send(`<!doctype html>
+  const safeTitle = escapeHtml(title);
+  const safeDescription = escapeHtml(description);
+
+  response.setHeader('Content-Type', 'text/html; charset=utf-8');
+  response.setHeader(
+    'Cache-Control',
+    'public, max-age=0, s-maxage=300, stale-while-revalidate=86400',
+  );
+
+  response.status(200).send(`<!doctype html>
 <html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${title}</title>
-<meta name="description" content="${description}">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="SAS SmartPlant">
-<meta property="og:title" content="${title}">
-<meta property="og:description" content="${description}">
-<meta property="og:url" content="${origin}/compartir">
-<meta property="og:image" content="${image}">
-<meta property="og:image:secure_url" content="${image}">
-<meta property="og:image:type" content="image/png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="${title}">
-<meta name="twitter:description" content="${description}">
-<meta name="twitter:image" content="${image}">
-<meta http-equiv="refresh" content="0;url=${portal}">
-<script>window.location.replace(${JSON.stringify(portal)});</script>
-</head>
-<body><p>Abriendo <a href="${portal}">SAS SmartPlant Executive Portal</a>…</p></body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>${safeTitle}</title>
+    <meta name="description" content="${safeDescription}" />
+    <link rel="canonical" href="${SHARE_URL}" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SAS SmartPlant" />
+    <meta property="og:locale" content="es_PA" />
+    <meta property="og:title" content="${safeTitle}" />
+    <meta property="og:description" content="${safeDescription}" />
+    <meta property="og:url" content="${SHARE_URL}" />
+    <meta property="og:image" content="${IMAGE_URL}" />
+    <meta property="og:image:secure_url" content="${IMAGE_URL}" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="SAS SmartPlant Executive Portal para supervisión en tiempo real de la planta DMI."
+    />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${safeTitle}" />
+    <meta name="twitter:description" content="${safeDescription}" />
+    <meta name="twitter:image" content="${IMAGE_URL}" />
+    <meta
+      name="twitter:image:alt"
+      content="SAS SmartPlant Executive Portal para supervisión en tiempo real de la planta DMI."
+    />
+
+    <meta http-equiv="refresh" content="1;url=${PORTAL_URL}" />
+  </head>
+
+  <body>
+    <p>
+      Abriendo
+      <a href="${PORTAL_URL}">SAS SmartPlant Executive Portal</a>…
+    </p>
+
+    <script>
+      window.setTimeout(function () {
+        window.location.replace(${JSON.stringify(PORTAL_URL)});
+      }, 700);
+    </script>
+  </body>
 </html>`);
 }
