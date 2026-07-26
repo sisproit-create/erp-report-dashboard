@@ -1,7 +1,13 @@
 {
-  "routes": [
-    { "src": "/compartir", "dest": "/api/share" },
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/compartir",
+      "destination": "/api/share"
+    },
+    {
+      "source": "/((?!api/|.*\\..*).*)",
+      "destination": "/index.html"
+    }
   ]
 }
