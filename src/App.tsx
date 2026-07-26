@@ -129,7 +129,7 @@ function App() {
   return <div className="app-shell">
     {mobileOpen && <button className="mobile-overlay" aria-label="Cerrar menú" onClick={()=>setMobileOpen(false)} />}
     <aside className={`sidebar ${mobileOpen?'open':''}`}>
-      <div className="brand"><div className="brand-icon"><Factory/></div><div><strong>SAS SmartPlant</strong><span>Executive Portal V6 · Live Operations Center</span></div></div>
+      <div className="brand"><div className="brand-icon"><Factory/></div><div><strong>SmartPlant Portal</strong><span>Executive Operations Center</span><small>Desarrollado por SISPRO LLC</small></div></div>
       <div className="plant-card"><Factory size={17}/><div><small>Planta activa</small><strong>DMI · Panamá</strong></div><span>ONLINE</span></div>
       <nav>{NAV.map(item=>{const Icon=item.icon; const active=activeNav.key===item.key; return <button key={item.key} className={active?'active':''} onClick={()=>navigate(item.path)}><Icon size={19}/><span>{item.label}</span>{active&&<i/>}</button>})}</nav>
       <div className="sidebar-footer"><small>Última sincronización</small><strong>{latestUpdate?new Date(latestUpdate).toLocaleString('es-PA'):'Pendiente'}</strong><span><i/> Supabase conectado</span></div>
@@ -137,10 +137,11 @@ function App() {
     <main>
       <header className="topbar">
         <button className="mobile-menu" aria-label="Abrir menú" onClick={()=>setMobileOpen(!mobileOpen)}>{mobileOpen?<X/>:<Menu/>}</button>
-        <div className="topbar-copy"><span className="eyebrow">SAS SMARTPLANT · EXECUTIVE PORTAL</span><h1>{activeNav.label}</h1><p>{activeNav.description}</p></div>
+        <div className="topbar-copy"><span className="eyebrow">SMARTPLANT PORTAL · INTELIGENCIA OPERATIVA</span><h1>{activeNav.label}</h1><p>{activeNav.description}</p></div>
         <div className="top-actions"><div className="period"><small>Periodo de referencia</small><strong>{summary?.periodo ?? 'Sin datos'}</strong></div><button onClick={load}><RefreshCw size={18}/><span>Actualizar</span></button></div>
       </header>
       <div className="content">{pageRoutes}</div>
+      <footer className="product-footer"><span>SmartPlant Portal</span><small>Inteligencia Operativa para Plantas Industriales · Desarrollado por SISPRO LLC</small></footer>
     </main>
   </div>;
 }

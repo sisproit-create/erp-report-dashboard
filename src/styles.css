@@ -413,7 +413,7 @@ main{
 }
 
 /* =========================================================
-   SAS SMARTPLANT V6 · LIVE OPERATIONS CENTER
+   SMARTPLANT PORTAL V6 · LIVE OPERATIONS CENTER
    ========================================================= */
 .v6-live-center{margin-bottom:24px;border:1px solid #0b607b;border-radius:22px;background:linear-gradient(145deg,rgba(3,37,54,.98),rgba(2,20,36,.98));box-shadow:0 20px 55px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.025);overflow:hidden}
 .v6-live-hero{display:flex;justify-content:space-between;gap:24px;padding:24px 26px;border-bottom:1px solid #123d53;background:radial-gradient(circle at 12% 0%,rgba(24,185,242,.13),transparent 42%)}
@@ -440,7 +440,7 @@ main{
 @media(max-width:390px){.v6-live-hero{display:grid;grid-template-columns:1fr}.v6-live-clock{width:100%}.v6-status-grid{grid-template-columns:1fr}}
 
 /* =========================================================
-   SAS SMARTPLANT V6.1 · EXPLICIT KPI REFERENCES
+   SMARTPLANT PORTAL V6.1 · EXPLICIT KPI REFERENCES
    ========================================================= */
 .v61-comparison{display:flex;flex-direction:column;gap:4px;margin-top:7px;padding-top:7px;border-top:1px solid rgba(82,137,163,.22)}
 .v61-comparison>span{display:flex;align-items:center;gap:5px;color:#b9cad5;font-size:10px;line-height:1.25}
@@ -458,4 +458,17 @@ main{
   .v61-comparison>span strong{font-size:9px}
   .v61-comparison>small{font-size:7.5px}
   .v61-reference-note{margin:0 12px 12px;font-size:8px}
+}
+
+/* =========================================================
+   SMARTPLANT PORTAL · PRODUCT BRANDING
+   ========================================================= */
+.brand>div:last-child{min-width:0}
+.brand small{display:block;margin-top:4px;color:#6f8da1;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;line-height:1.3}
+.product-footer{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:8px 28px 22px;padding:16px 18px;border-top:1px solid rgba(25,199,251,.15);color:#718b9e}
+.product-footer span{color:#c9e8f4;font-weight:800;letter-spacing:.03em}
+.product-footer small{text-align:right;line-height:1.45}
+@media(max-width:760px){
+  .product-footer{margin:5px 14px 18px;align-items:flex-start;flex-direction:column;gap:5px;padding:14px 4px}
+  .product-footer small{text-align:left}
 }

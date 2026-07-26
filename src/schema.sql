@@ -1,4 +1,4 @@
--- SAS SmartPlant Executive Portal · Esquema definitivo V4
+-- SmartPlant Portal · Esquema definitivo V4
 -- Idempotente: puede ejecutarse varias veces sin errores.
 
 create extension if not exists pgcrypto;

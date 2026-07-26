@@ -1,5 +1,5 @@
-const SITE_URL = 'https://sas-erp-reportes.vercel.app';
-const PORTAL_URL = `${SITE_URL}/`;
+const SITE_URL = 'https://portal.sisprollc.com';
+const PORTAL_URL = `${SITE_URL}/resumen`;
 const SHARE_URL = `${SITE_URL}/compartir`;
 const IMAGE_URL = `${SITE_URL}/og-smartplant.jpg`;
 
@@ -13,9 +13,9 @@ function escapeHtml(value: string): string {
 }
 
 export default function handler(_request: any, response: any): void {
-  const title = 'SAS SmartPlant • Executive Portal';
+  const title = 'SmartPlant Portal • Inteligencia Operativa Industrial';
   const description =
-    'Supervise la planta desde cualquier lugar. Producción, costos, diésel, AC30 y calidad en tiempo real.';
+    'Supervise producción, costos, inventarios, diésel, AC30 y calidad en tiempo real. Desarrollado por SISPRO LLC.';
 
   const safeTitle = escapeHtml(title);
   const safeDescription = escapeHtml(description);
@@ -37,7 +37,7 @@ export default function handler(_request: any, response: any): void {
     <link rel="canonical" href="${SHARE_URL}" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="SAS SmartPlant" />
+    <meta property="og:site_name" content="SmartPlant Portal" />
     <meta property="og:locale" content="es_PA" />
     <meta property="og:title" content="${safeTitle}" />
     <meta property="og:description" content="${safeDescription}" />
@@ -49,7 +49,7 @@ export default function handler(_request: any, response: any): void {
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="SAS SmartPlant Executive Portal para supervisión en tiempo real de la planta DMI."
+      content="SmartPlant Portal, plataforma de inteligencia operativa para plantas industriales desarrollada por SISPRO LLC."
     />
 
     <meta name="twitter:card" content="summary_large_image" />
@@ -58,7 +58,7 @@ export default function handler(_request: any, response: any): void {
     <meta name="twitter:image" content="${IMAGE_URL}" />
     <meta
       name="twitter:image:alt"
-      content="SAS SmartPlant Executive Portal para supervisión en tiempo real de la planta DMI."
+      content="SmartPlant Portal, plataforma de inteligencia operativa para plantas industriales desarrollada por SISPRO LLC."
     />
 
     <meta http-equiv="refresh" content="1;url=${PORTAL_URL}" />
@@ -67,7 +67,7 @@ export default function handler(_request: any, response: any): void {
   <body>
     <p>
       Abriendo
-      <a href="${PORTAL_URL}">SAS SmartPlant Executive Portal</a>…
+      <a href="${PORTAL_URL}">SmartPlant Portal</a>…
     </p>
 
     <script>
