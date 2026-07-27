@@ -846,3 +846,126 @@ main{
     grid-template-columns:1fr;
   }
 }
+
+
+/* =========================================================
+   SMARTPLANT PORTAL V6.3 · DAILY VS MONTHLY EXECUTIVE VIEW
+   ========================================================= */
+.v63-executive-dashboard .v63-status-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
+.v63-executive-dashboard .v6-status-card{
+  min-height:198px;
+}
+
+.v63-dual-kpi{
+  display:flex;
+  flex-direction:column;
+}
+
+.v63-kpi-primary{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  margin-top:14px;
+}
+
+.v63-kpi-primary>small{
+  color:#6f8fa3;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.12em;
+}
+
+.v63-kpi-primary>strong{
+  color:#f4fbff;
+  font-family:Rajdhani,Inter,sans-serif;
+  font-size:27px;
+  line-height:1.05;
+}
+
+.v63-month-reference,
+.v63-plant-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:auto;
+  padding-top:10px;
+  border-top:1px solid rgba(82,137,163,.24);
+}
+
+.v63-month-reference>span,
+.v63-plant-meta>span{
+  color:#7893a6;
+  font-size:9px;
+}
+
+.v63-month-reference>strong,
+.v63-plant-meta>strong{
+  color:#cdebf5;
+  font-size:11px;
+  text-align:right;
+}
+
+.v63-dual-kpi.optimal{
+  border-color:#087e68;
+}
+
+.v63-dual-kpi.attention{
+  border-color:#b17a16;
+}
+
+.v63-dual-kpi.critical{
+  border-color:#a93248;
+}
+
+.v63-dual-kpi.neutral{
+  border-color:#124a62;
+}
+
+.v63-plant-card,
+.v63-alert-card{
+  display:flex;
+  flex-direction:column;
+}
+
+.v63-plant-card>strong,
+.v63-alert-card>strong{
+  margin-top:17px;
+}
+
+.v63-reference-note{
+  margin-top:0;
+}
+
+@media(max-width:1100px){
+  .v63-executive-dashboard .v63-status-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+
+@media(max-width:760px){
+  .v63-executive-dashboard .v63-status-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .v63-executive-dashboard .v6-status-card{
+    min-height:190px;
+  }
+
+  .v63-kpi-primary>strong{
+    font-size:24px;
+  }
+}
+
+@media(max-width:390px){
+  .v63-executive-dashboard .v63-status-grid{
+    grid-template-columns:1fr;
+  }
+
+  .v63-executive-dashboard .v6-status-card{
+    min-height:0;
+  }
+}
