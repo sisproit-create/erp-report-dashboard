@@ -513,7 +513,7 @@ main{
   width: 100vw;
   height: 100dvh;
   object-fit: cover;
-  object-position: center;
+  object-position: center 42%;
   transform: scale(1);
   transform-origin: center;
   animation:
@@ -688,8 +688,8 @@ main{
 }
 
 @keyframes smartplant-v9-zoom {
-  from { transform: scale(1); }
-  to { transform: scale(1.035); }
+  from { transform: scale(0.985); }
+  to { transform: scale(1.015); }
 }
 
 @keyframes smartplant-v9-brand {
@@ -739,7 +739,7 @@ main{
 
 @media (orientation: landscape) {
   .splash-screen--v9 .splash-screen__image {
-    object-position: center;
+    object-position: center 42%;
   }
 
   .splash-screen--v9 .splash-screen__status {
