@@ -779,3 +779,70 @@ main{
     transform: scaleX(1);
   }
 }
+
+/* =========================================================
+   SMARTPLANT PORTAL V6.2 · EXECUTIVE DASHBOARD
+   KPI AC30 kg/T del día y cuadrícula ejecutiva 3 × 2
+   ========================================================= */
+.v62-executive-dashboard .v6-status-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
+.v62-executive-dashboard .v6-status-card{
+  min-height:154px;
+}
+
+.v62-executive-dashboard .v62-ac30-card{
+  position:relative;
+  overflow:hidden;
+}
+
+.v62-executive-dashboard .v62-ac30-card::after{
+  content:"";
+  position:absolute;
+  right:-42px;
+  bottom:-58px;
+  width:132px;
+  height:132px;
+  border-radius:50%;
+  pointer-events:none;
+  background:radial-gradient(circle,rgba(25,199,251,.13),transparent 68%);
+}
+
+.v62-executive-dashboard .v62-ac30-card.optimal{
+  border-color:#087e68;
+}
+
+.v62-executive-dashboard .v62-ac30-card.attention{
+  border-color:#b17a16;
+}
+
+.v62-executive-dashboard .v62-ac30-card.critical{
+  border-color:#a93248;
+}
+
+.v62-executive-dashboard .v62-ac30-card.neutral{
+  border-color:#124a62;
+}
+
+@media(max-width:1100px){
+  .v62-executive-dashboard .v6-status-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+
+@media(max-width:760px){
+  .v62-executive-dashboard .v6-status-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .v62-executive-dashboard .v6-status-card{
+    min-height:0;
+  }
+}
+
+@media(max-width:390px){
+  .v62-executive-dashboard .v6-status-grid{
+    grid-template-columns:1fr;
+  }
+}

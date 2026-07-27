@@ -1,7 +1,7 @@
 {
   "name": "smartplant-portal",
   "private": true,
-  "version": "6.1.0",
+  "version": "6.2.0",
   "type": "module",
   "engines": {
     "node": "22.x"
@@ -26,5 +26,5 @@
     "typescript": "^5.7.2",
     "vite": "^6.0.5"
   },
-  "description": "SmartPlant Portal · Inteligencia Operativa para Plantas Industriales · Desarrollado por SISPRO LLC"
+  "description": "SmartPlant Portal V6.2 · Executive Dashboard con KPI AC30 kg/T del día"
 }
