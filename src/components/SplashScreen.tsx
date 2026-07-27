@@ -13,7 +13,7 @@ interface SplashScreenProps {
 }
 
 export default function SplashScreen({
-  duration = 3600,
+  duration = 6500,
   onComplete,
 }: SplashScreenProps) {
   const fadeDuration = 450;

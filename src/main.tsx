@@ -31,7 +31,7 @@ function Root() {
 
       {showSplash && (
         <SplashScreen
-          duration={2800}
+          duration={6500}
           onComplete={handleSplashComplete}
         />
       )}
