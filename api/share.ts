@@ -122,20 +122,24 @@ export default function handler(_request: any, response: any): void {
 
     <meta
       http-equiv="refresh"
-      content="1;url=${PORTAL_URL}"
+      content="0;url=${PORTAL_URL}"
     />
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: #06131b;
+        overflow: hidden;
+      }
+    </style>
   </head>
 
   <body>
-    <p>
-      Abriendo
-      <a href="${PORTAL_URL}">SmartPlant Portal</a>…
-    </p>
-
     <script>
-      window.setTimeout(function () {
-        window.location.replace(${JSON.stringify(PORTAL_URL)});
-      }, 700);
+      window.location.replace(${JSON.stringify(PORTAL_URL)});
     </script>
   </body>
 </html>`);
