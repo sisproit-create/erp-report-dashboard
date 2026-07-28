@@ -978,3 +978,92 @@ main{
 @media(max-width:1250px){.cp-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:800px){.cp-hero{flex-direction:column;padding:18px}.cp-period-switch{width:100%}.cp-period-switch button{flex:1;justify-content:center}.cp-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cp-chart-grid{grid-template-columns:1fr}.cp-dispatches header{align-items:flex-start;flex-direction:column}.cp-dispatches header label{width:100%}.cp-panel>header{padding:16px}.cp-panel .table-wrap{padding:8px 12px 14px}.cp-hero h2{font-size:24px}}
 @media(max-width:390px){.cp-kpi-grid{grid-template-columns:1fr}.cp-period-switch{flex-direction:column}.cp-kpi-grid article>strong{font-size:22px}}
+
+
+/* =========================================================
+   SMARTPLANT PORTAL V6.4 · RESPONSIVE COMPACT
+   ========================================================= */
+html,body,#root{width:100%;max-width:100%;overflow-x:hidden}
+.app-shell,main,.content,.panel,.metric,.v6-live-center,.v6-status-card{min-width:0}
+.content{max-width:1480px;margin:0 auto}
+img,svg,canvas{max-width:100%}
+.recharts-responsive-container{min-width:0!important}
+
+/* Splash rápido y cambio automático según orientación */
+.splash-screen--v9{transition:opacity 280ms ease,visibility 280ms ease}
+.splash-screen--v9 .splash-screen__picture{position:absolute;inset:0;display:block;width:100%;height:100%}
+.splash-screen--v9 .splash-screen__image{width:100%;height:100%;object-fit:cover;object-position:center}
+.splash-screen--v9 .splash-screen__status{max-width:520px}
+
+/* Escritorio compacto */
+.topbar{padding:18px 24px}
+.content{padding:0 22px 30px}
+.metrics-grid,.health-grid{gap:12px}
+.metric{padding:15px;min-height:116px}
+.panel{border-radius:16px}
+.panel-head{padding:16px 18px}
+.v6-live-hero{padding:20px 22px}
+.v6-status-grid{gap:12px;padding:14px}
+.v6-status-card{padding:15px;min-height:136px}
+
+@media(max-width:800px){
+  .topbar{grid-template-columns:42px minmax(0,1fr) 42px;padding:max(10px,env(safe-area-inset-top)) 12px 10px;gap:8px}
+  .mobile-menu,.top-actions button{width:42px;height:42px;min-height:42px;border-radius:11px}
+  .topbar h1{font-size:clamp(23px,6.5vw,30px)}
+  .topbar-copy .eyebrow{font-size:7.5px;letter-spacing:.12em}
+  .content{padding:10px 10px max(24px,calc(env(safe-area-inset-bottom) + 14px))}
+  .dashboard-grid,.dashboard-grid.equal,.dashboard-grid.two-one,.chart-grid.four{gap:10px}
+  .panel{border-radius:14px;overflow:hidden}
+  .panel-head{padding:13px 14px}
+  .panel-head h2{font-size:18px}
+  .interpretation-card{padding:13px;gap:10px;margin-bottom:12px}
+  .interpretation-copy h3{font-size:18px}
+  .interpretation-copy p,.interpretation-copy ul,.interpretation-copy strong{font-size:10.5px}
+  .v6-live-center{border-radius:15px}
+  .v6-live-hero{padding:14px;gap:10px}
+  .v6-live-hero h2{font-size:21px;line-height:1.05}
+  .v6-live-hero p{font-size:10.5px;line-height:1.35}
+  .v6-live-clock{min-width:106px;padding:9px 10px;border-radius:13px}
+  .v6-live-clock strong{font-size:15px}
+  .v6-status-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:10px;gap:9px}
+  .v6-status-card{padding:12px;min-height:108px;border-radius:14px}
+  .v6-status-card>strong{font-size:20px;line-height:1.05}
+  .v6-status-card p{font-size:10px;line-height:1.3}
+  .v6-status-card small{font-size:9px}
+  .health-grid,.metrics-grid.five,.metrics-grid.four{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .metric{padding:12px;min-height:104px;border-radius:14px}
+  .metric>strong{font-size:20px;line-height:1.08;overflow-wrap:anywhere}
+  .metric>p{font-size:9px}
+  .metric-head span{font-size:9px}
+  .report-grid{padding:0 12px 14px;gap:10px}
+  .table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:620px}
+}
+
+@media(max-width:430px){
+  .v6-live-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start}
+  .v6-live-clock{width:auto;min-width:96px}
+  .v6-live-label{grid-column:1/-1}
+  .v6-live-hero h2{font-size:19px}
+  .v6-live-hero p{grid-column:1/-1}
+  .v6-status-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .v6-status-card{min-height:100px;padding:11px}
+  .v6-status-card>strong{font-size:18px}
+  .health-grid,.metrics-grid.five,.metrics-grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .metric{min-height:98px;padding:11px}
+  .metric>strong{font-size:18px}
+  .splash-screen--v9 .splash-screen__brand{top:max(12px,calc(env(safe-area-inset-top) + 8px));left:12px;right:12px}
+  .splash-screen--v9 .splash-screen__status{right:12px;left:12px;bottom:max(14px,calc(env(safe-area-inset-bottom) + 10px));padding:12px 13px}
+  .splash-screen--v9 .splash-screen__status-row strong{font-size:18px}
+}
+
+@media(max-width:350px){
+  .v6-status-grid,.health-grid,.metrics-grid.five,.metrics-grid.four{grid-template-columns:1fr}
+}
+
+@media(orientation:landscape) and (max-height:520px){
+  .splash-screen--v9 .splash-screen__brand{top:10px;left:12px;padding:8px 10px}
+  .splash-screen--v9 .splash-screen__status{right:12px;bottom:10px;width:min(390px,46vw);padding:10px 12px;gap:5px}
+  .splash-screen--v9 .splash-screen__status-row strong{font-size:17px}
+  .splash-screen--v9 .splash-screen__instruction{font-size:9px}
+}

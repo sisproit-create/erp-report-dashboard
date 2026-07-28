@@ -13,15 +13,11 @@ interface SplashScreenProps {
 }
 
 export default function SplashScreen({
-  duration = 6500,
+  duration = 1800,
   onComplete,
 }: SplashScreenProps) {
-  const fadeDuration = 450;
+  const fadeDuration = 280;
   const [isLeaving, setIsLeaving] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-
-  const remainingRef = useRef(duration);
-  const startedAtRef = useRef<number | null>(null);
   const fadeTimerRef = useRef<number | null>(null);
   const completeTimerRef = useRef<number | null>(null);
   const completedRef = useRef(false);
@@ -31,7 +27,6 @@ export default function SplashScreen({
       window.clearTimeout(fadeTimerRef.current);
       fadeTimerRef.current = null;
     }
-
     if (completeTimerRef.current !== null) {
       window.clearTimeout(completeTimerRef.current);
       completeTimerRef.current = null;
@@ -40,75 +35,33 @@ export default function SplashScreen({
 
   const finish = useCallback(() => {
     if (completedRef.current) return;
-
     completedRef.current = true;
     clearTimers();
     onComplete();
   }, [clearTimers, onComplete]);
 
-  const startTimers = useCallback(
-    (remaining: number) => {
-      clearTimers();
-
-      if (remaining <= 0) {
-        finish();
-        return;
-      }
-
-      startedAtRef.current = performance.now();
-
-      const fadeDelay = Math.max(remaining - fadeDuration, 0);
-
-      if (fadeDelay === 0) {
-        setIsLeaving(true);
-      } else {
-        fadeTimerRef.current = window.setTimeout(() => {
-          setIsLeaving(true);
-        }, fadeDelay);
-      }
-
-      completeTimerRef.current = window.setTimeout(finish, remaining);
-    },
-    [clearTimers, fadeDuration, finish],
-  );
-
   useEffect(() => {
-    remainingRef.current = duration;
     completedRef.current = false;
     setIsLeaving(false);
-    setIsPaused(false);
-    startTimers(duration);
+
+    const fadeDelay = Math.max(duration - fadeDuration, 0);
+    fadeTimerRef.current = window.setTimeout(() => setIsLeaving(true), fadeDelay);
+    completeTimerRef.current = window.setTimeout(finish, duration);
 
     return clearTimers;
-  }, [clearTimers, duration, startTimers]);
+  }, [clearTimers, duration, fadeDuration, finish]);
 
-  const togglePause = useCallback(() => {
+  const skipSplash = useCallback(() => {
     if (completedRef.current || isLeaving) return;
-
-    if (!isPaused) {
-      const elapsed =
-        startedAtRef.current === null
-          ? 0
-          : performance.now() - startedAtRef.current;
-
-      remainingRef.current = Math.max(
-        remainingRef.current - elapsed,
-        0,
-      );
-
-      clearTimers();
-      setIsPaused(true);
-      return;
-    }
-
-    setIsPaused(false);
-    startTimers(remainingRef.current);
-  }, [clearTimers, isLeaving, isPaused, startTimers]);
+    clearTimers();
+    setIsLeaving(true);
+    completeTimerRef.current = window.setTimeout(finish, fadeDuration);
+  }, [clearTimers, fadeDuration, finish, isLeaving]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      togglePause();
+      skipSplash();
     }
   };
 
@@ -118,33 +71,27 @@ export default function SplashScreen({
 
   return (
     <div
-      className={[
-        "splash-screen",
-        "splash-screen--v9",
-        isPaused ? "splash-screen--paused" : "",
-        isLeaving ? "splash-screen--leaving" : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      className={`splash-screen splash-screen--v9${isLeaving ? " splash-screen--leaving" : ""}`}
       style={style}
       role="button"
       tabIndex={0}
-      aria-pressed={isPaused}
-      aria-label={
-        isPaused
-          ? "Presentación pausada. Toque nuevamente para continuar."
-          : "Iniciando SmartPlant Portal. Toque para pausar."
-      }
-      onClick={togglePause}
+      aria-label="Iniciando SmartPlant Portal. Toque para continuar."
+      onClick={skipSplash}
       onKeyDown={handleKeyDown}
     >
-      <img
-        src="/og-smartplant-whatsapp-v7.jpg"
-        alt="SmartPlant Portal · Resumen Ejecutivo"
-        className="splash-screen__image"
-        fetchPriority="high"
-        draggable={false}
-      />
+      <picture className="splash-screen__picture">
+        <source
+          media="(orientation: portrait)"
+          srcSet="/og-smartplant-splash-portrait-v64.jpg"
+        />
+        <img
+          src="/og-smartplant-whatsapp-v7.jpg"
+          alt="SmartPlant Portal · Resumen Ejecutivo"
+          className="splash-screen__image"
+          fetchPriority="high"
+          draggable={false}
+        />
+      </picture>
 
       <div className="splash-screen__shade" aria-hidden="true" />
 
@@ -156,19 +103,9 @@ export default function SplashScreen({
       <div className="splash-screen__status">
         <div className="splash-screen__status-row">
           <span className="splash-screen__pulse" aria-hidden="true" />
-          <strong>
-            {isPaused
-              ? "Presentación pausada"
-              : "Iniciando SmartPlant Portal"}
-          </strong>
+          <strong>Iniciando SmartPlant Portal</strong>
         </div>
-
-        <span className="splash-screen__instruction">
-          {isPaused
-            ? "Toque nuevamente para continuar"
-            : "Toque la pantalla para pausar"}
-        </span>
-
+        <span className="splash-screen__instruction">Toque para continuar</span>
         <div className="splash-screen__progress" aria-hidden="true">
           <span className="splash-screen__progress-bar" />
         </div>
