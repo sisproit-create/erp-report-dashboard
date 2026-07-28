@@ -296,7 +296,7 @@ export function LiveOperationsCenter({
       <div className="v6-live-hero">
         <div>
           <span className="v6-live-label">
-            <Radio size={15} /> LIVE OPERATIONS CENTER · V6.3
+            <Radio size={15} /> LIVE OPERATIONS CENTER · V6.4
           </span>
           <h2>DMI Panamá · Estado operativo</h2>
           <p>
@@ -333,7 +333,7 @@ export function LiveOperationsCenter({
 
           <div className="v63-plant-meta">
             <span>Última fecha operativa</span>
-            <strong>{latest?.fecha ?? 'Sin registro'}</strong>
+            <strong>{latest?.fecha ? new Date(`${latest.fecha}T12:00:00`).toLocaleDateString('es-PA', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Sin registro'}</strong>
           </div>
         </article>
 

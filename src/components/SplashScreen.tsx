@@ -82,7 +82,7 @@ export default function SplashScreen({
       <picture className="splash-screen__picture">
         <source
           media="(orientation: portrait)"
-          srcSet="/og-smartplant-splash-portrait-v64.jpg"
+          srcSet="/og-smartplant-whatsapp-v8.jpg"
         />
         <img
           src="/og-smartplant-whatsapp-v7.jpg"

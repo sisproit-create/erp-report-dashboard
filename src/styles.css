@@ -1067,3 +1067,59 @@ img,svg,canvas{max-width:100%}
   .splash-screen--v9 .splash-screen__status-row strong{font-size:17px}
   .splash-screen--v9 .splash-screen__instruction{font-size:9px}
 }
+
+
+/* =========================================================
+   SMARTPLANT PORTAL V6.4.1 · RESPONSIVE COMPACT HOTFIX
+   WhatsApp OG, mobile portrait and phone landscape
+   ========================================================= */
+html,body,#root{width:100%;max-width:100%;overflow-x:hidden}
+img,svg,canvas{max-width:100%}
+
+/* Splash: fill the viewport in both orientations. */
+.splash-screen--v9 .splash-screen__picture{position:absolute;inset:0;display:block;width:100%;height:100%}
+.splash-screen--v9 .splash-screen__image{width:100%;height:100%;object-fit:cover;object-position:center}
+@media (orientation:portrait){
+  .splash-screen--v9 .splash-screen__image{object-position:62% center;transform:scale(1.04)}
+  .splash-screen--v9 .splash-screen__brand{right:max(18px,calc(env(safe-area-inset-right) + 14px))}
+}
+@media (orientation:landscape){
+  .splash-screen--v9 .splash-screen__image{object-position:center 45%}
+  .splash-screen--v9 .splash-screen__status{max-width:560px;margin-inline:auto}
+}
+
+/* Phone portrait: one readable KPI per row, no broken values or dates. */
+@media (max-width:640px){
+  .topbar{padding:14px 12px 12px;gap:8px}
+  .topbar h1{font-size:clamp(27px,9vw,36px);margin-top:5px}
+  .eyebrow{font-size:8px;letter-spacing:.13em}
+  .content{padding:0 10px 24px}
+  .v6-live-center{margin-bottom:16px;border-radius:16px}
+  .v6-live-hero{display:grid;grid-template-columns:1fr;gap:12px;padding:16px}
+  .v6-live-label{font-size:9px;letter-spacing:.16em}
+  .v6-live-hero h2{font-size:24px;line-height:1.05;margin:8px 0 5px}
+  .v6-live-hero p{font-size:12px;line-height:1.45}
+  .v6-live-clock{width:100%;min-width:0;grid-template-columns:auto auto 1fr;padding:10px 12px}
+  .v6-live-clock svg{grid-row:auto}.v6-live-clock strong{font-size:17px}.v6-live-clock span{align-self:center;text-align:right}
+  .v6-status-grid,.v63-status-grid{grid-template-columns:minmax(0,1fr)!important;padding:10px!important;gap:10px!important}
+  .v6-status-card{width:100%;min-width:0;min-height:0!important;padding:15px!important}
+  .v6-status-card>strong{font-size:clamp(25px,8vw,34px);white-space:normal;overflow-wrap:anywhere}
+  .v63-plant-meta{gap:12px}.v63-plant-meta strong{white-space:nowrap;font-size:14px}
+  .v61-comparison>span{flex-wrap:wrap}
+}
+
+/* Phone landscape: keep mobile shell; never expose the desktop sidebar. */
+@media (max-height:600px) and (pointer:coarse){
+  .app-shell{display:block!important}
+  .sidebar{position:fixed!important;transform:translate3d(-105%,0,0)!important;width:min(82vw,330px)!important;z-index:1000!important}
+  .sidebar.open{transform:translate3d(0,0,0)!important}
+  main{grid-column:auto!important;width:100%!important;max-width:100%!important;margin-left:0!important}
+  .mobile-menu{display:block!important}
+  .topbar{padding:10px 14px!important;align-items:center!important}
+  .topbar h1{font-size:28px!important}
+  .topbar p,.period{display:none!important}
+  .content{padding:0 12px 20px!important}
+  .v6-live-hero{padding:14px 16px!important}
+  .v6-status-grid,.v63-status-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;padding:12px!important;gap:10px!important}
+  .v6-status-card{min-width:0!important}
+}
