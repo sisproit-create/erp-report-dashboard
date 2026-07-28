@@ -187,3 +187,25 @@ where table_schema = 'public'
 order by table_name;
 
 -- En Storage debe existir un bucket público llamado: erp-reportes
+
+-- SmartPlant Portal V6.4 · Producción por clientes, proyectos y despachos
+create table if not exists public.erp_dashboard_despachos (
+  id uuid primary key default gen_random_uuid(),
+  codigo text unique not null,
+  periodo text not null,
+  fecha date not null,
+  ticket text,
+  placa text,
+  camion text,
+  cliente text not null,
+  proyecto text not null,
+  toneladas numeric not null default 0,
+  estado text default 'confirmado',
+  fecha_actualizacion timestamptz not null default now()
+);
+create index if not exists idx_erp_despachos_periodo_fecha on public.erp_dashboard_despachos(periodo,fecha);
+create index if not exists idx_erp_despachos_cliente_proyecto on public.erp_dashboard_despachos(cliente,proyecto);
+alter table public.erp_dashboard_despachos enable row level security;
+drop policy if exists "Lectura pública despachos" on public.erp_dashboard_despachos;
+create policy "Lectura pública despachos" on public.erp_dashboard_despachos for select using (true);
+
