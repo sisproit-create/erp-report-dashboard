@@ -10,7 +10,7 @@ import {
 } from 'recharts';
 import { supabase } from './lib/supabase';
 import { LiveOperationsCenter } from './v6/components/LiveOperationsCenter';
-import { ClientProjectIntelligence, type DispatchRow } from './v6/components/ClientProjectIntelligence';
+import { ClientProjectIntelligence, type DispatchRow, type ClientProjectRow } from './v6/components/ClientProjectIntelligence';
 
 type ViewKey = 'resumen' | 'produccion' | 'clientes-proyectos' | 'combustible' | 'ac30' | 'equipos' | 'costos' | 'reportes' | 'alertas';
 type Report = { id:string; titulo:string; descripcion:string|null; categoria:string; periodo:string|null; formato:string; archivo_nombre:string; archivo_url:string; archivo_size:number; fecha_publicacion:string; created_at?:string|null; destacado?:boolean; orden_destacado?:number|null };
@@ -63,6 +63,7 @@ function App() {
   const [rankings,setRankings]=useState<RankingRow[]>([]);
   const [alerts,setAlerts]=useState<AlertRow[]>([]);
   const [dispatches,setDispatches]=useState<DispatchRow[]>([]);
+  const [clientProjects,setClientProjects]=useState<ClientProjectRow[]>([]);
   const [query,setQuery]=useState('');
   const [category,setCategory]=useState('Todas');
   const [loadIssues,setLoadIssues]=useState<string[]>([]);
@@ -72,7 +73,7 @@ function App() {
 
   async function load() {
     setLoading(true);
-    const [r,i,s,ser,eq,rank,al,desp] = await Promise.all([
+    const [r,i,s,ser,eq,rank,al,desp,cp] = await Promise.all([
       supabase.from('erp_reportes').select('*').eq('estado','publicado').order('fecha_publicacion',{ascending:false}),
       supabase.from('erp_indicadores').select('*').order('nombre'),
       supabase.from('erp_dashboard_resumen').select('*').order('periodo',{ascending:false}).limit(1),
@@ -81,8 +82,9 @@ function App() {
       supabase.from('erp_dashboard_rankings').select('*').order('posicion',{ascending:true}),
       supabase.from('erp_alertas').select('*').order('fecha_actualizacion',{ascending:false}),
       supabase.from('erp_dashboard_despachos').select('*').order('fecha',{ascending:true}),
+      supabase.from('erp_dashboard_clientes_proyectos').select('*').order('toneladas',{ascending:false}),
     ]);
-    const issues=[issue('Reportes',r),issue('Indicadores',i),issue('Resumen',s),issue('Tendencias',ser),issue('Equipos',eq),issue('Rankings',rank),issue('Alertas',al)].filter(Boolean) as string[];
+    const issues=[issue('Reportes',r),issue('Indicadores',i),issue('Resumen',s),issue('Tendencias',ser),issue('Equipos',eq),issue('Rankings',rank),issue('Alertas',al),issue('Despachos',desp),issue('Clientes y proyectos',cp)].filter(Boolean) as string[];
     setLoadIssues(issues);
     const validReports=(safe<Report[]>(r) ?? [])
       .filter(x=>!INVALID_REPORT.test(`${x.titulo} ${x.archivo_nombre}`))
@@ -101,6 +103,7 @@ function App() {
     setRankings((safe<RankingRow[]>(rank) ?? []).filter(x=>!period||x.periodo===period));
     setAlerts((safe<AlertRow[]>(al) ?? []).filter(x=>!period||x.periodo===period));
     setDispatches((safe<DispatchRow[]>(desp) ?? []).filter(x=>!period||x.periodo===period));
+    setClientProjects((safe<ClientProjectRow[]>(cp) ?? []).filter(x=>!period||x.periodo===period));
     setLoading(false);
   }
 
@@ -121,7 +124,7 @@ function App() {
   const categories=['Todas',...Array.from(new Set(reports.map(r=>r.categoria))).sort()];
 
   const routedPage = pathname === '/produccion' ? <Production summary={summary} series={series}/>
-    : pathname === '/clientes-proyectos' ? <ClientProjectIntelligence dispatches={dispatches} period={summary?.periodo ?? '2026-07'}/>
+    : pathname === '/clientes-proyectos' ? <ClientProjectIntelligence dispatches={dispatches} aggregates={clientProjects} period={summary?.periodo ?? '2026-07'}/>
     : pathname === '/combustible' ? <FuelPage summary={summary} series={series} equipment={equipment}/>
     : pathname === '/ac30-laboratorio' ? <AC30Page summary={summary} series={series}/>
     : pathname === '/equipos' ? <EquipmentPage equipment={equipment}/>
